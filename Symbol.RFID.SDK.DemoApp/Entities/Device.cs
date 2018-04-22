@@ -9,14 +9,15 @@ namespace Symbol.RFID.SDK.DemoApp.Entities
     /// <summary>
     /// This is used to create device info object which is used in filling combox redear list.
     /// </summary>
+    // JA: rename to RFIDReaderItem to represent a Item in the combo box
     public class Device
     {
         private DeviceInfo deviceInfo;
 
-        public Device(DeviceInfo deviceInfo)
+        public Device(DeviceInfo deviceInfo) // JA: Can use a RFIDReader object to create this instead of a new DeviceInfo type. 
         {
-            TagUtility tagUtility = new TagUtility();
-            this.deviceInfo = deviceInfo;
+            TagUtility tagUtility = new TagUtility(); // JA:Not used remove
+            this.deviceInfo = deviceInfo; // JA: Not used, remove. Save Bluetooth address in a string. 
             Text = deviceInfo.FriendlyName + " (" + deviceInfo.ComPortNumber + ")";
             Value = deviceInfo.Reader;
         }
@@ -28,7 +29,7 @@ namespace Symbol.RFID.SDK.DemoApp.Entities
         {
             get
             {
-                return deviceInfo.BluetoothAddress;
+                return deviceInfo.BluetoothAddress; //JA: Can use reader.BluetoothAddress
             }
         }
         public override string ToString()

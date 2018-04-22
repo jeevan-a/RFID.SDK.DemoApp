@@ -6,6 +6,7 @@ using Symbol.RFID.SDK.Domain.Reader;
 
 namespace Symbol.RFID.SDK.DemoApp.Entities
 {
+    // JA: Sparingly used, this class I think we can remove. Most fo the data is redundent. 
     public class DeviceInfo
     {
         /// <summary>

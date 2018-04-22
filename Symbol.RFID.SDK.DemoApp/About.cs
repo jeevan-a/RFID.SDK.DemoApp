@@ -12,6 +12,7 @@ using System.IO;
 
 namespace Symbol.RFID.SDK.DemoApp
 {
+    // JA: Change name to About to be same as class name
     public partial class frmAbout : Form
     {
         private IRfidReader reader;
@@ -27,6 +28,7 @@ namespace Symbol.RFID.SDK.DemoApp
             this.reader = selectedReader;
         }
 
+        //JA: Lets rename to Frm Event Handlers
         #region About Form Events
 
         private void frmAbout_Load(object sender, EventArgs e)

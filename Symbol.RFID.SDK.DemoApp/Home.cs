@@ -16,31 +16,32 @@ using Symbol.RFID.SDK.DemoApp.Utilities;
 
 namespace Symbol.RFID.SDK.DemoApp
 {
-    public partial class Home : Form
+    public partial class frmHome : Form // JA:Lets make this Home to be consistent with the file name
     {
         private StringBuilder sbOutStatus = new StringBuilder();
         private frmInventory frmInventory;
-        private frmMenu frmMenu;
-        private bool isWatingForEvent = false;
+        private frmMenu frmMenu; // JA: Does this need to be public, can use like frmAbout
+        private bool isWatingForEvent = false; // JA: spelling mistake (isWaitingForEvents) this is not needed can remove the property. On the disconnect/connect eventhandlers just change the cursor back
         private IRfidReader selectedReader;
-        private Dictionary<string, DeviceInfo> availableReaders;
+        private Dictionary<string, DeviceInfo> availableReaders; //JA: is not required. You only need to fill the listbox. Can init the variable within the method scope
         private List<IRfidReader> readerList;
-        private bool isConnected;
+        private bool isConnected; // JA: Not needed. selectedReader == null can be used.
 
-        public Home()
+        public frmHome()
         {
             InitializeComponent();
 
+            // JA: Lets move this to a function, initializeReaderWatcher
             IRemoteReaderWatcher readerWatcher = RfidSdk.RemoteReaderWatcherServicesFactory.Create();
             readerWatcher.ReaderAppeared += new EventHandler<ReaderStatusChangedEventArgs>(ReaderAppearedHandler);
             readerWatcher.ReaderDisappeared += new EventHandler<ReaderStatusChangedEventArgs>(ReaderDisappearedHandler);
             readerWatcher.ReaderConnected += new EventHandler<ReaderStatusChangedEventArgs>(ReaderConnectedHandler);
             readerWatcher.ReaderDisconnected += new EventHandler<ReaderStatusChangedEventArgs>(ReaderDisconnectedHandler);
 
-            this.availableReaders = this.GetAvailableRFIDReaderList(); ;
+            this.availableReaders = this.GetAvailableRFIDReaderList(); ; // JA: Not needed here, can be used inside the method to fill the listbox
         }
-
-        #region Home Form Events
+        // JA: Lets rename as Form Event Handlers
+        #region Home Form Events 
 
         private void frmHome_Load(object sender, EventArgs e)
         {
@@ -56,6 +57,7 @@ namespace Symbol.RFID.SDK.DemoApp
                 {
                     RFIDLibraryUtility.Disconnect(this.selectedReader);
 
+                    // JA: This will not work right as the disconnect is already done? Can remove the whole block.
                     if (this.frmInventory != null && this.frmInventory.inventoryInProgress)
                     {
                         RFIDLibraryUtility.StopInventory(this.selectedReader);
@@ -72,6 +74,7 @@ namespace Symbol.RFID.SDK.DemoApp
         private void frmHome_Activated(object sender, EventArgs e)
         {
             //call restore default if clicked restore default button in setting menu screen.
+            // JA: Is there any possibility to do this in the setting screen and not have the logic in this screen? 
             if (DeviceStatus.IsRestoreDefaultClicked)
             {
                 DeviceStatus.IsRestoreDefaultClicked = false;
@@ -99,6 +102,7 @@ namespace Symbol.RFID.SDK.DemoApp
         private void btnToggleConnection_Click(object sender, EventArgs e)
         {
             //at this point reader is not still initialized , so here we can't use reader.IsConnected bool. so keep internal bool in model 
+            // JA: Can check selectedReader==null
             if (this.isConnected)
             {
                 this.Disconnect();
@@ -111,12 +115,14 @@ namespace Symbol.RFID.SDK.DemoApp
 
         private void btnSetting_Click(object sender, EventArgs e)
         {
+            // JA: Are we maintaining sessions in settings screen? if not we can init a new frame and show, similar to btnAbout_Click
             frmMenu.ShowDialog();
         }
 
         private void btnInventory_Click(object sender, EventArgs e)
         {
             frmInventory.ShowDialog();
+            // JA: Chech the inventory in progress here and update the UI without asking the invneotory form to invoke methods in main
         }
 
         private void btnAbout_Click(object sender, EventArgs e)
@@ -127,12 +133,14 @@ namespace Symbol.RFID.SDK.DemoApp
 
         #endregion
 
+        // JA: lets rename as RFIDReader Event Handlers
         #region Event Handlers
 
         private void Inventory_BatchMode(object sender, ReadSessionBatchModeEventArgs e)
         {
+            // JA: Lets add a comment here why this event is occuring. Ex. Device is connected in batch mode. Disabling settings screen. 
             this.DebugWrite("batch mode running event" + e.Mode.ToString());
-            this.OnBatchModeRun();
+            this.OnBatchModeRun(); // JA: no need for a different method. bring that code here.
             DeviceStatus.IsBatchModeInventoryRunning = true;
         }
 
@@ -140,7 +148,9 @@ namespace Symbol.RFID.SDK.DemoApp
         {
             this.DebugWrite(e.RFIDReaderInfo.FriendlyName + " Appeared.");
 
-            var iReaderInfo = GetCurrentReader(e);
+            // JA: Lets add a new method UpdateReaderList(RFIDReaderInfo reader, bool Appeared) and move this logic there. 
+            //     The logic here is about checking the device already in the list and if not update the list. Use the same method on disappear
+            var iReaderInfo = GetCurrentReader(e); 
             if (iReaderInfo != null) return;
 
             var readerInfo = e.RFIDReaderInfo;
@@ -158,13 +168,14 @@ namespace Symbol.RFID.SDK.DemoApp
             };
 
             this.AddToReaderList(deviceInfo);
+            // JA: Till here
 
         }
 
         private void ReaderDisappearedHandler(object sender, ReaderStatusChangedEventArgs e)
         {
             this.DebugWrite(e.RFIDReaderInfo.FriendlyName + " Disappeared.");
-
+            // JA: Use the method mentioned above to update the readerl list and keep the connected device cleanup code here. 
             var reader = this.GetCurrentReader(e);
             if (reader != null)
             {
@@ -181,14 +192,19 @@ namespace Symbol.RFID.SDK.DemoApp
         private void ReaderConnectedHandler(object sender, ReaderStatusChangedEventArgs e)
         {
             var reader = GetCurrentReader(e);
+            // JA: Add comment here
             if (reader != null && this.selectedReader.BluetoothAddress == reader.BluetoothAddress)
             {
+                // JA: onConnected is called only from here lets move that logic here as well and add more comments 
                 this.OnConnected(reader.BluetoothAddress, reader.FriendlyName);
 
+
+                // JA: comment here
                 if (!DeviceStatus.IsBatchModeInventoryRunning)
                 {
                     try
                     {
+                        // JA: Lets comment each line why we need to maintain the information
                         RFIDLibraryUtility.CheckRegion(reader);
                         DeviceStatus.IsTriggerRepeat = RFIDLibraryUtility.IsTriggerRepeat(reader);
                         DeviceStatus.BatchMode = RFIDLibraryUtility.GetBatchMode(reader);
@@ -196,6 +212,7 @@ namespace Symbol.RFID.SDK.DemoApp
                     }
                     catch (Exception)
                     {
+                        // JA: LEts change the debugwrite to include device in batch mode
                         this.DebugWrite("Event: Reading Region and Triggers after Invenrtory Stopped" + Environment.NewLine);
                         DeviceStatus.Initialized = false;
                     }
@@ -205,11 +222,17 @@ namespace Symbol.RFID.SDK.DemoApp
 
         private void ReaderDisconnectedHandler(object sender, ReaderStatusChangedEventArgs e)
         {
+            // JA: Logic change check for selectedReader is null and selectedReader.BluetoothAddress==e.RFIDReaderInfo.Bluetooth address
+
+            // JA: Not needed
             var reader = GetCurrentReader(e);
+            
             if (this.selectedReader != null)
             {
+                
                 if (reader != null && this.selectedReader.BluetoothAddress == reader.BluetoothAddress)
                 {
+                    // JA:add comment per line why
                     this.UnRegisterEvents();
                     this.selectedReader.Inventory.BatchMode -= Inventory_BatchMode;
                     this.ResetInventoryScreen();
@@ -224,6 +247,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
         #region internal Members - calls from different screen
 
+        // JA: Can this be done using the Device object ? when the inventory form close need to check the inventory in progress is all.
         internal void CheckBatchState(bool isInventoryInProgress)
         {
             if (DeviceStatus.IsBatchModeInventoryRunning || isInventoryInProgress)
@@ -268,6 +292,7 @@ namespace Symbol.RFID.SDK.DemoApp
         /// Gets the available RFID reader list.
         /// </summary>
         /// <returns></returns>
+        // JA: This can be moved to the Utility class and use the output to populate the listbox
         private Dictionary<string, DeviceInfo> GetAvailableRFIDReaderList()
         {
             List<IRfidReaderInfo> readerInfoList = null;
@@ -309,6 +334,7 @@ namespace Symbol.RFID.SDK.DemoApp
                 Device selectedItem = (Device)comboBoxReaders.SelectedItem;
                 this.selectedReader = (IRfidReader)selectedItem.Value;
 
+                // JA: Lets move the Inits outside the try catch. The device might not connect for some reason, have to handle that and not init before that.
                 this.InitFormInventory();
 
                 this.frmMenu = new frmMenu(this.selectedReader, this);
@@ -395,22 +421,26 @@ namespace Symbol.RFID.SDK.DemoApp
             }
         }
 
-        private IRfidReader GetCurrentReader(ReaderStatusChangedEventArgs e)
+        // JA: This method name is misleading. lets rename to something like GetRFIDReader and change argument from EventArgs to RFIDReaderInfo as only the RFIDReaderInfor is used
+        private IRfidReader GetCurrentReader(ReaderStatusChangedEventArgs e) 
         {
             var readerList = this.readerList;
             var reader = readerList.Find(i => i.BluetoothAddress.Equals(e.RFIDReaderInfo.BluetoothAddress, StringComparison.OrdinalIgnoreCase));
             return reader;
         }
 
+        // JA: DO we need to check if the selectedReader is the one to be removed?
         private void RemoveReader(IRfidReader reader)
         {
             this.RemoveFromReaderList(reader);
             this.readerList.Remove(reader);
         }
 
+        
         private void DebugWrite(string txt)
         {
 #if DEBUG
+            // JA: Add a comment about debug messages
             System.Diagnostics.Debug.WriteLine(txt);
 #endif
         }
@@ -491,6 +521,7 @@ namespace Symbol.RFID.SDK.DemoApp
             {
                 try
                 {
+                    // JA: As mentioned above nto needed just set to default
                     if (this.isWatingForEvent)
                         Cursor.Current = Cursors.Default;
 

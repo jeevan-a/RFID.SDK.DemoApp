@@ -1,6 +1,6 @@
 ﻿namespace Symbol.RFID.SDK.DemoApp
 {
-    partial class Home
+    partial class frmHome
     {
         /// <summary>
         /// Required designer variable.

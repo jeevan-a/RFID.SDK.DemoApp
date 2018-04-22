@@ -6,6 +6,7 @@ using Symbol.RFID.SDK.Domain.Reader;
 
 namespace Symbol.RFID.SDK.DemoApp.Entities
 {
+    //JA: Lets rename to ReaderStatus or ActiveReaderStatus
     public class DeviceStatus
     {
         public static bool IsBatchModeInventoryRunning { get; set; }

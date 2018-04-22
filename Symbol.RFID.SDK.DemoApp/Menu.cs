@@ -11,12 +11,13 @@ using Symbol.RFID.SDK.DemoApp.Entities;
 
 namespace Symbol.RFID.SDK.DemoApp
 {
+    //JA: Change class name to Menu to match filename
     public partial class frmMenu : Form
     {
-        private Form mainForm;
-        private frmSettings frmSettings;
+        private Form mainForm; //JA: not used, lets remove. Used to pass to Settings screen but inside again not used
+        private frmSettings frmSettings; // JA: Does it need to be public?
         private IRfidReader selectedReader;
-        private int tabIndex;
+        private int tabIndex; // JA: Not needed, pass the index as a parameter to the method. Refrain from using global variables as much as posibble. 
 
 
         public frmMenu(IRfidReader selectedReader, Form mainForm)
@@ -26,10 +27,12 @@ namespace Symbol.RFID.SDK.DemoApp
             this.mainForm = mainForm;
         }
 
+        //JA: Rename to Form Event HAndlers 
         #region Menu Form Events
 
         private void btnTabAntenna_Click(object sender, EventArgs e)
         {
+            //JA: Use a enum to map tabIndex to readable names and use it. SettingsTabs.Antenna, SettingsTabs.Singulation etc. 
             this.tabIndex = 0;
             this.LoadAllSettingScreen();
         }
@@ -90,6 +93,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
         private void btnRestore(object sender, EventArgs e)
         {
+            // JA: What is the purpose? to clsoe the screens recursively on a rest to defautls? if so comment
             DeviceStatus.IsRestoreDefaultClicked = true;
             this.Close();
         }
@@ -103,6 +107,8 @@ namespace Symbol.RFID.SDK.DemoApp
 
         #region MenuView Private Members
 
+
+        // JA: Add a parameter and pass the index instead of using global variable
         private void LoadAllSettingScreen()
         {
             if (frmSettings == null)
@@ -119,6 +125,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
         public void UnRegisterSettingEvents()
         {
+            // JA: Setting the settings form to null will do the same. Check. IF working remove all UnregisterEvents methods and set the form to null when required to unregister
             if (frmSettings != null)
                 this.frmSettings.UnRegisterInventoryEvents();
         }

@@ -5,6 +5,7 @@ using System.Text;
 
 namespace Symbol.RFID.SDK.DemoApp.Entities
 {
+    //JA: Lets mentoin only these two are selected and others are not used in sample application. 
     public class TagData
     {
         #region Private Fields

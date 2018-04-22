@@ -14,6 +14,7 @@ using System.Threading;
 
 namespace Symbol.RFID.SDK.DemoApp
 {
+    // JA: Rename to Inventory
     public partial class frmInventory : Form
     {
         private Form mainForm;
@@ -23,28 +24,33 @@ namespace Symbol.RFID.SDK.DemoApp
         private Thread readerThread;
         private bool isStopPressed;
         private bool isAlertShown;
+        // JA: This does not need to be a global scope, instead pass it to the method.
         private TagData[] tagData;
 
+        // JA: Public attributes should start with capital letters
         public bool inventoryInProgress;
+        // JA: Public attributes should start with capital letters
         public IRfidReader selectedReader;
         
 
         public frmInventory(IRfidReader selectedReader, Form main)
         {
             InitializeComponent();
-
+            // JA: Remove commented code
             // this.Model = new InventoryModel();
             //this.presenter = new InventoryPresenter();
             //this.Model.SelectedReader = selectedReader;
             this.selectedReader = selectedReader;
             mainForm = main;
 
+            //JA: why isnt the initInventory used here. Same code repeated in 2 places?
             //this.InitInventory();
             tagUtility = new TagUtility();
             this.InitInventoryList();
             this.RegisterEvents();
         }
 
+        //JA: Rename to Form Event Handlers
         #region Inventory Form Events
 
         private void btnToggleInventory_Click(object sender, EventArgs e)
@@ -61,18 +67,21 @@ namespace Symbol.RFID.SDK.DemoApp
             }
         }
 
+        //JA: Lets user full name for the button btnInventoryBack or simply btnBack
         private void btnInvBack_Click(object sender, EventArgs e)
         {
             this.Close();
-            ((Home)this.mainForm).CheckBatchState(this.inventoryInProgress);
+            // JA: when then Form is closed from the main form look at the inventory in progress state and do the needful. no need to use line below
+            ((frmHome)this.mainForm).CheckBatchState(this.inventoryInProgress);
         }
 
         private void frmInventory_Activated(object sender, EventArgs e)
         {
-            this.DebugWrite("In ShowDialogActivated");
+            this.DebugWrite("In ShowDialogActivated"); // JA: Not needed
             this.DebugWrite("IsBatchModeRunning " + DeviceStatus.IsBatchModeInventoryRunning.ToString());
             this.DebugWrite("InventoryInProgress " + this.inventoryInProgress.ToString());
 
+            //JA: This logic I am not sure why needed ?
             //TODO check is this condition is required or not.
             if (this.isAlertShown)
             {
@@ -80,6 +89,7 @@ namespace Symbol.RFID.SDK.DemoApp
             }
             else
             {
+                // JA: The mothod name is not misleading. Either rename or move the logic here with comments. The method is only used from here.
                 this.OnBatchModeRun();
             }
 
@@ -87,6 +97,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
         #endregion
 
+        // JA: Rename to RFID Reader Event Handlers
         #region Event Handlers
 
         private void Inventory_TagDataReceived(object sender, TagDataReceivedEventArgs e)
@@ -102,7 +113,7 @@ namespace Symbol.RFID.SDK.DemoApp
         private void Inventory_InventoryStopped(object sender, EventArgs e)
         {
             this.DebugWrite("Event: Reader=>Inventory Stopped" + Environment.NewLine);
-
+            // JA: add comments to initialize reader after batch mode is over. default regions is only set if regions s not set. reword below comment.
             //set default region and isTriggerReapeat.
             if (!DeviceStatus.Initialized)
             {
@@ -121,15 +132,18 @@ namespace Symbol.RFID.SDK.DemoApp
             }
             if (DeviceStatus.IsTriggerRepeat && !this.isStopPressed)
             {
+                // JA: Add comments here in detail
                 this.inventoryInProgress = true;
                 this.ToggleInventoryButtonText();//here text will be changed as "Stop"  
             }
             else
             {
+                // JA: Add comments here in detail
                 this.inventoryInProgress = false;
                 this.ToggleInventoryButtonText();//here text will be changed as "Start" 
                 this.isStopPressed = false;
 
+                // JA: Add comments here
                 if (DeviceStatus.IsBatchModeInventoryRunning && !this.isStopPressed)
                 {
                     this.ToggleBatchModeNotification(false);
@@ -143,7 +157,9 @@ namespace Symbol.RFID.SDK.DemoApp
 
         private void Inventory_InventorySessionSummary(object sender, ReadSessionSummaryEventArgs e)
         {
+            
             this.DebugWrite("Event: Reader=>Inventory Summary" + Environment.NewLine);
+            //JA: remove the rest as we are nto processing any of it
             if (e != null)
             {
                 ReadSessionSummaryEventArgs readSessionSummary = (ReadSessionSummaryEventArgs)e;
@@ -193,8 +209,10 @@ namespace Symbol.RFID.SDK.DemoApp
         /// <summary>
         /// Shows the tag data.
         /// </summary>
+        // JA: Take in the tagData to process. 
         private void ShowTagData()
         {
+            // JA: Lets see some alternatives to make this more optimized.
             ShowTagDelegate showTagDelegate = delegate
             {
                 foreach (TagData data in this.tagData)
@@ -222,6 +240,7 @@ namespace Symbol.RFID.SDK.DemoApp
         /// </summary>
         private void ShowAlert(string message)
         {
+            // JA: why is the isAlartShow's use scenario?
             this.isAlertShown = true;
             MessageBox.Show(message);
         }
@@ -231,6 +250,7 @@ namespace Symbol.RFID.SDK.DemoApp
         /// </summary>
         private void ResetTagInfo()
         {
+            //JA: Add comments
             this.tagData = null;
             this.tagList.Clear();
 
@@ -241,16 +261,21 @@ namespace Symbol.RFID.SDK.DemoApp
             }
         }
 
+        // JA: Rename method to ShowOnBatchModeText
         private void ToggleBatchModeNotification(bool isVisible)
         {
+            // JA: Add comments
             this.BeginInvoke(new Action(delegate
             {
                 txtNotifyBatchMode.Visible = isVisible;
             }));
         }
 
+       
         private void InitInventoryList()
         {
+            // JA: This can be set in the control it self from the design view, why do we need to do it progamitically here?
+            // If can be done in the desiger please remove the whole method.
             this.listInventory.View = View.Details;
             this.listInventory.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
         }
@@ -262,8 +287,10 @@ namespace Symbol.RFID.SDK.DemoApp
         {
             try
             {
+                
                 if (this.selectedReader != null)
                 {
+                    // JA: Please do this better, this will work but is not the right practivce. I did it as a quick fix to get other stuff working. 
                     // To make sure to register only once
                     this.selectedReader.Inventory.InventoryStarted -= Inventory_InventoryStarted;
                     this.selectedReader.Inventory.InventoryStopped -= Inventory_InventoryStopped;
@@ -330,6 +357,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
                     if (DeviceStatus.BatchMode == BATCH_MODE.ENABLE)
                     {
+                        // JA: Remove commented code
                         //this.View.ShowAlert("Inventory is running in batch mode");
                         this.ToggleBatchModeNotification(true);
                         DeviceStatus.IsBatchModeInventoryRunning = true;
@@ -344,6 +372,7 @@ namespace Symbol.RFID.SDK.DemoApp
             }
             catch (InvalidOperationException ex)
             {
+                // JA: Add comments
                 if (ex.Message.Contains("Unknown read session is in place"))
                 {
                     this.ShowAlert("Unknown inventory is running in batch mode. Click to Stop");
@@ -446,7 +475,10 @@ namespace Symbol.RFID.SDK.DemoApp
                     id = "";
                 }
 
+                // JA: TagSeenCOunt will be an int in the new changers Prasad is doing, hence may need to update here.
                 TagData data = this.tagUtility.GetTagData(id, ushort.Parse(e.TagSeenCount));
+                
+                // JA: pass the data to ShowTagData method instead of using the global variable
                 this.tagData = new TagData[] { data };
                 if (data != null) this.ShowTagData();
             }
@@ -459,6 +491,7 @@ namespace Symbol.RFID.SDK.DemoApp
                         TagData[] tagDataArr = tagUtility.GetReadTags(100, this.selectedReader);
                         if (tagDataArr != null)
                         {
+                            // JA: pass the data to ShowTagData method instead of using the global variable
                             this.tagData = tagDataArr;
                             this.ShowTagData();
                         }
@@ -473,6 +506,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
         #endregion
 
+        //JA: Typo 
         #region Public Memebers - calls from different screen
 
         /// <summary>
@@ -485,6 +519,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
         public void OnBatchModeRun()
         {
+            //JA: Add comments
             BeginInvoke(new Action(delegate
             {
                 if (DeviceStatus.IsBatchModeInventoryRunning)
@@ -499,6 +534,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
         public void CleanUIOnDisconnect()
         {
+            //JA: Add comments
             BeginInvoke(new Action(delegate
             {
                 this.ResetTagInfo();

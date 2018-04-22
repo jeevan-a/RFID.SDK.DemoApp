@@ -13,7 +13,7 @@ namespace Symbol.RFID.SDK.DemoApp
         [MTAThread]
         static void Main()
         {
-            Application.Run(new Home());
+            Application.Run(new frmHome());
         }
     }
 }

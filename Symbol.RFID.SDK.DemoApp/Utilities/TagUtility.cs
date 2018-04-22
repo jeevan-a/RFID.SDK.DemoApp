@@ -33,6 +33,7 @@ namespace Symbol.RFID.SDK.DemoApp.Utilities
         {
             TagDataReceivedEventArgs[] tagDataReceived = RFIDLibraryUtility.GetReadTags(numberOfTags, reader);
 
+            // JA: Why use a queue when the return type is an Array. Use an array of size numberOfTags or length of tagDataRecieved and populate it
             var temp = new Queue();
 
             foreach (TagDataReceivedEventArgs dataReceived in tagDataReceived)
@@ -42,10 +43,12 @@ namespace Symbol.RFID.SDK.DemoApp.Utilities
                     _tagId = dataReceived.EPCId
                 };
 
+                //JA: New SDK will have this as int. Please check with Prasad
                 dataReceived.TagSeenCount.TryParseToUshort(out tagData._tagSeenCount);
 
                 temp.Enqueue(tagData);
             }
+            // Remove the double boxing in the ruturn using the array instead of a queue
             return (temp.Count > 0) ? temp.ToArray().OfType<TagData>().ToArray() : null;
         }
         #endregion

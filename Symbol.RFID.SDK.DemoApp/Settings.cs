@@ -13,15 +13,16 @@ using System.Reflection;
 
 namespace Symbol.RFID.SDK.DemoApp
 {
+    // JA: rename to Settings
     public partial class frmSettings : Form
     {
 
-        private Form tabItemForm;
-        private Form home;
-        private const int MAX_OUTPUT_LINES = 100;
-        private int outputLinePos = 0;
-        private StringBuilder sbOutStatus = new StringBuilder();
-        private StringBuilder sbOutCapabilities = new StringBuilder();
+        private Form tabItemForm; //JA: Not used, remove
+        private Form home; // JA: not used remove
+        private const int MAX_OUTPUT_LINES = 100; //JA: is this needed? This is usefull when everything is going to a single text box, now it is not
+        private int outputLinePos = 0; // JA: is this needed? This is usefull when everything is going to a single text box, now it is not
+        private StringBuilder sbOutStatus = new StringBuilder(); //JA: not needed a global String Builder
+        private StringBuilder sbOutCapabilities = new StringBuilder(); // JA: Not needed
         private IRfidReader selectedReader;
 
 
@@ -35,18 +36,20 @@ namespace Symbol.RFID.SDK.DemoApp
             this.home = home;
         }
 
-
+        // JA: Rename to Form Event Handlers
         #region Settings Form Events
 
         private void btnGetPower_Click(object sender, EventArgs e)
         {
             this.GetPower();
+            // JA: I thought Get will not show a dialog
             this.ShowAlert("Get Successfully...");
         }
 
         private void btnSingulationApply_Click(object sender, EventArgs e)
         {
-            this.ApplySingulation();
+            this.ApplySingulation(); //JA: Retrive the values from text boxes and combo boxes here and pass them as parameters to the ApplySingulation method. much cleaner. THis goes for other methods too
+            // JA: based on the return, show the message, this will show up anyway even if it fails. This goes for other methods too
             this.ShowAlert("Applied Successfully...");
         }
 
@@ -110,38 +113,46 @@ namespace Symbol.RFID.SDK.DemoApp
 
         private void rdoStartTriggerReleased_Click(object sender, EventArgs e)
         {
+            // JA: Why do we need to do this explicitly? shouldint this work without code behind. Please check. YOu might need to group them in a container
             rdoStartTriggerPressed.Checked = false;
         }
 
         private void rdoStartTriggerPressed_Click(object sender, EventArgs e)
         {
+            // JA: Why do we need to do this explicitly? shouldint this work without code behind. Please check. YOu might need to group them in a container
             rdoStartTriggerReleased.Checked = false;
         }
 
         private void rdoStopTriggerReleased_Click(object sender, EventArgs e)
         {
+            // JA: Why do we need to do this explicitly? shouldint this work without code behind. Please check. YOu might need to group them in a container
             rdoStopTriggerPressed.Checked = false;
         }
 
         private void rdoStopTriggerPressed_Click(object sender, EventArgs e)
         {
+            // JA: Why do we need to do this explicitly? shouldint this work without code behind. Please check. YOu might need to group them in a container
             rdoStopTriggerReleased.Checked = false;
         }
 
         private void btnStartTriggerApply_Click(object sender, EventArgs e)
         {
+            // JA: Lookup above comment for ApplySingluation
             this.ApplyStartTriggerInfo();
             this.ShowAlert("Applied Successfully...");
         }
 
         private void btnStopTriggerApply_Click(object sender, EventArgs e)
         {
+            // JA: Lookup above comment for ApplySingluation
             this.ApplyStopTriggerInfo();
             this.ShowAlert("Applied Successfully...");
         }
 
         private void btnSetPower_Click(object sender, EventArgs e)
         {
+            // JA: Move to a method similar to other 
+            // JA: Lookup above comment for ApplySingluation
             try
             {
                 if (this.selectedReader != null)
@@ -164,6 +175,8 @@ namespace Symbol.RFID.SDK.DemoApp
 
         private void btnSetBeeperVolume_Click(object sender, EventArgs e)
         {
+            // JA: Move to a method similar to other 
+            // JA: Lookup above comment for ApplySingluation
             try
             {
                 if (this.selectedReader != null)
@@ -218,12 +231,16 @@ namespace Symbol.RFID.SDK.DemoApp
 
         private void btnSetBatchMode_Click(object sender, EventArgs e)
         {
+            
+            // JA: Lookup above comment for ApplySingluation
             this.SetBatchMode();
             this.ShowAlert("Saved Changes");
         }
 
         private void btnSaveConfig_Click(object sender, EventArgs e)
         {
+            // JA: Move to a method similar to other 
+            // JA: Lookup above comment for ApplySingluation            
             this.StartProgress();
             try
             {
@@ -251,6 +268,7 @@ namespace Symbol.RFID.SDK.DemoApp
         {
             switch (tabSetting.SelectedIndex)
             {
+                    // JA: use the same enum suggested in Menu.cs
                 case 0:
                     this.GetPower();
                     break;
@@ -258,10 +276,12 @@ namespace Symbol.RFID.SDK.DemoApp
                     this.GetSingulation();
                     break;
                 case 2:
+                    // JA: This will override Trigger to some value user have not saved. Please check
                     this.SetStartTriggerInit();
                     this.GetStartTriggerInfo();
                     break;
                 case 3:
+                    // JA: This will override Trigger to some value user have not saved. Please check
                     this.SetStopTriggerInit();
                     this.GetStopTriggerInfo();
                     break;
@@ -299,6 +319,7 @@ namespace Symbol.RFID.SDK.DemoApp
         {
             if (e != null)
             {
+                // JA: Why casting the samething to same class type? can use directly
                 TemperatureStatusNotificationReceivedEventArgs temperatureNotification = (TemperatureStatusNotificationReceivedEventArgs)e;
                 this.OutputStatusText("Event: Reader=>Temperature Alarm" + Environment.NewLine);
                 this.OutputStatusText("STM32 Temperature = " + temperatureNotification.AmbTemp + Environment.NewLine);
@@ -311,6 +332,7 @@ namespace Symbol.RFID.SDK.DemoApp
         {
             if (e != null)
             {
+                // JA: Why casting the samething to same class type? can use directly
                 PowerStatusNotificationReceivedEventArgs powerNotification = (PowerStatusNotificationReceivedEventArgs)e;
                 this.OutputStatusText("Event: Reader=>Power" + Environment.NewLine);
                 this.OutputStatusText("Current = " + powerNotification.Current + Environment.NewLine);
@@ -324,6 +346,7 @@ namespace Symbol.RFID.SDK.DemoApp
         {
             if (e != null)
             {
+                // JA: Why casting the samething to same class type? can use directly
                 BatteryStatusNotificationReceivedEventArgs battertyNotification = (BatteryStatusNotificationReceivedEventArgs)e;
                 this.OutputStatusText("Event: Reader=>Battery" + Environment.NewLine);
                 this.OutputStatusText("Level = " + (uint)battertyNotification.Level + "%" + Environment.NewLine);
@@ -388,6 +411,7 @@ namespace Symbol.RFID.SDK.DemoApp
             SetVisibilityStopTriggeParams(false); ;
         }
 
+        // JA: Encapsulate all of these methods to do with visbility toggles in a region with comments so it is not confusing
         private void SetVisibilityStartPeriodicParams(bool isVisible)
         {
             lblPeriodicParams.Visible = isVisible;
@@ -431,6 +455,7 @@ namespace Symbol.RFID.SDK.DemoApp
             rdoStopTriggerReleased.Visible = isVisible;
             rdoStopTriggerPressed.Visible = isVisible;
         }
+        //JA: Till here
 
         private SESSION GetSession(string text)
         {
@@ -462,6 +487,7 @@ namespace Symbol.RFID.SDK.DemoApp
         /// <summary>
         /// Registers the events.
         /// </summary>
+        // JA: Private method should start with simple letter
         private void RegisterEvents()
         {
             this.selectedReader.BatteryStatusNotification += SelectedReader_BatteryStatusNotification;
@@ -541,6 +567,7 @@ namespace Symbol.RFID.SDK.DemoApp
 
             if (singulationControl != null)
             {
+                // JA: Why clean combo list and add again? 
                 var sessionItems = this.GetNames(typeof(SESSION));
 
                 cboSession.Items.Clear();
@@ -549,7 +576,7 @@ namespace Symbol.RFID.SDK.DemoApp
                 {
                     cboSession.Items.Add(item);
                 }
-
+                // JA: General comment: sometimes this. is used, sometimes, not. lets stick to one way.
                 this.cboSession.Text = singulationControl.Session.ToString();
                 this.txtPopulation.Text = singulationControl.TagPopulation.ToString();
             }
@@ -976,6 +1003,7 @@ namespace Symbol.RFID.SDK.DemoApp
             }
         }
 
+        // JA: This is confusing, lets discuss I think we can simplfy this
         private void OutputStatusText(string txt)
         {
             if (this.txtStatusResult.InvokeRequired)
@@ -988,6 +1016,7 @@ namespace Symbol.RFID.SDK.DemoApp
             else { this.AppendOutputText(txt, this.txtStatusResult, this.sbOutStatus); }
         }
 
+        // JA: This is confusing, lets discuss I think we can simplfy this
         private void AppendOutputText(string text, TextBox textBox, StringBuilder logger)
         {
             try
@@ -1042,11 +1071,13 @@ namespace Symbol.RFID.SDK.DemoApp
 #endif
         }
 
+        // JA: Method name misleading change or use the Cursor.Wait directly where needed
         private void StartProgress()
         {
             Cursor.Current = Cursors.WaitCursor;
         }
 
+        // JA: Method name misleading change or use the Cursor.Default directly where needed
         private void EndProgress()
         {
             Cursor.Current = Cursors.Default;
@@ -1065,6 +1096,7 @@ namespace Symbol.RFID.SDK.DemoApp
         /// <summary>
         /// This is accessed by Home screen for unregistering event when reader is disconneced.
         /// </summary>
+        /// // JA: Setting the settings form to null will do the same. Check. IF working remove all UnregisterEvents methods and set the form to null when required to unregister
         public void UnRegisterInventoryEvents()
         {
             this.selectedReader.BatteryStatusNotification -= SelectedReader_BatteryStatusNotification;
